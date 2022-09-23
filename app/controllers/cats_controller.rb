@@ -21,11 +21,7 @@ class CatsController < ApplicationController
 
     def destroy
         cat = Cat.find(params[:id])
-        if cat.destroy
-            render json: cat
-        else
-            render json: cat.errors
-        end
+        cat.destroy
     end
 
     private

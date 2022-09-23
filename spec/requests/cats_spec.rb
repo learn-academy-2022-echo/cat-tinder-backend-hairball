@@ -31,19 +31,36 @@ RSpec.describe "Cats", type: :request do
     end
   end
   describe 'PATCH /update' do
-    before(:each) do
-      @cat = Cat.create(name: "Craig", age: 7, enjoys: "something", image: "website")
-      @cat.update(:name => "Adam")
-      get '/cats'
+    let!(:cat) {
+      Cat.create(
+        name: 'Greg',
+        age: 4,
+        enjoys: 'being outside',
+        image: "www.www.www.com"
+      )
+    }
+    it 'updates valid cat attributes' do 
+      cat_params = {
+        cat: {
+          name: 'Craig',
+          age: 4,
+          enjoys: 'being outside',
+          image: "www.www.www.com"
+        }
+      }
+      patch "/cats/#{cat.id}", params: cat_params
+
       expect(response).to have_http_status(200)
-      expect(@cat).to change {@cat.name}.from("Craig").to("Adam")
+      catHash = JSON.parse(response.body).deep_symbolize_keys
+      expect(catHash[:name]).to eq("Craig")
     end
   end
   describe 'DELETE /delete' do
     it 'deletes a cat' do
-    @cat = Cat.create(name: "Craig", age: 7, enjoys: "something", image: "website")
-    @cat.destroy
-    expect(Cat.count).to eq 0
+      deleteCat = Cat.create name:"Henry", age:100, enjoys:"sleeping", image:"www.google.com"
+      delete "/cats/#{deleteCat.id}"
+      expect(response.status).to eq(204)
+      expect(Cat.count).to eq 0
     end
   end
 end
