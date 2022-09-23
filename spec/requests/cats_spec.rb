@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Cats", type: :request do
   describe "GET /index" do
     it "gets a list of cats" do
-      Cat.create name:"Henry", age:100, enjoys:"sleeping", image:"www.google.com"
+      Cat.create name:"Henry", age:100, enjoys:"sleeping a lot", image:"www.google.com"
 
       get '/cats'
 
@@ -57,10 +57,52 @@ RSpec.describe "Cats", type: :request do
   end
   describe 'DELETE /delete' do
     it 'deletes a cat' do
-      deleteCat = Cat.create name:"Henry", age:100, enjoys:"sleeping", image:"www.google.com"
+      deleteCat = Cat.create name:"Henry", age:100, enjoys:"sleeping a TON", image:"www.google.com"
       delete "/cats/#{deleteCat.id}"
       expect(response.status).to eq(204)
       expect(Cat.count).to eq 0
+    end
+  end
+  describe 'POST /create' do
+    it 'Cannot be created without a name' do
+      cat_params = {
+        cat: {
+          age: 4,
+          enjoys: 'being outside',
+          image: 'www.www.www.com'
+        }
+      }
+
+      post '/cats', params: cat_params
+
+      expect(response).to have_http_status(422)
+      json = JSON.parse(response.body)
+      expect(json['name']).to include("can't be blank")
+    end
+  end
+  describe 'PATCH /update' do
+    let!(:cat) {
+      Cat.create(
+        name: 'Greg',
+        age: 4,
+        enjoys: 'being outside',
+        image: 'www.www.www.com'
+      )
+    }
+    it 'Cannot be updated if cat name is not valid' do 
+      cat_params = {
+        cat: {
+          name: '',
+          age: 4,
+          enjoys: 'being outside',
+          image: 'www.www.www.com'
+        }
+      }
+      patch "/cats/#{cat.id}", params: cat_params
+
+      expect(response).to have_http_status(422)
+      json = JSON.parse(response.body)
+      expect(json['name']).to include("can't be blank")
     end
   end
 end
